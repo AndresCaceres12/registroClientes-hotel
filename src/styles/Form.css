@@ -57,3 +57,32 @@ img:active {
   border-radius: 10px;
   border: 2px solid #a1a0a0;
 }
+
+/* Estilos generales para el contenedor de servicio */
+.service-container {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+.service-description {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.service-price {
+  font-size: 14px;
+  color: #555;
+}
+
+
+.remove-button {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.add-button {
+  background-color: #2ecc71;
+  color: white;
+}

@@ -1,5 +1,5 @@
 import React from 'react'
-import Formhotel from '../components/DataPersonal'
+import Formhotel from '../components/FormData'
 
 const Principal = () => {
   return (
