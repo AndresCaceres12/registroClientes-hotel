@@ -8,6 +8,7 @@ import Visa from "./Visa";
 import TablaData from "./TablaData";
 import ImgPagos from "./ImgPagos";
 import FechasForms from "./FechasForms";
+import { DeleteOutlined } from "@ant-design/icons";
 import {
   Button,
   Col,
@@ -84,19 +85,8 @@ const Formhotel = () => {
     setOpen(false);
   };
   const onSubmit = (data) => {
-    setData(data);
-    const filteredData = Object.fromEntries(
-      Object.entries(data).filter(
-        ([key, value]) => value !== "" && value !== undefined
-      )
-    );
-    setData(filteredData);
-
-    setTimeout(() => {
-      console.log(filteredData);
-    }, 2000);
+    setData( Data);
   };
-
   console.log(Data);
   const showChildrenDrawer = () => {
     setChildrenDrawer(true);
@@ -110,7 +100,19 @@ const Formhotel = () => {
     setValue("servicio", null);
     setisvalid(false);
   }, [selectedRoom]);
+  const [cardData, setCardData] = useState([]);
 
+  // ...
+  
+  useEffect(() => {
+    // Update card data when servicios field array changes
+    const updatedCardData = fields.map((item, index) => ({
+      description: getValues(`servicios.${index}.prueba`),
+      price: getValues(`servicios.${index}.precio`),
+    }));
+    setCardData(updatedCardData);
+  }, [fields, getValues]);
+  
   return (
     <div>
       <div className="Inicio">
@@ -176,8 +178,129 @@ const Formhotel = () => {
                   </Form.Item>
                 )}
               />
+          </Col>
+          
+          {/* <Col span={24}>
+              {fields.map((item, index) => (
+                <div
+                  key={item.id}
+                  style={{ display: "flex", alignItems: "center" }}
+                >
+                  <Controller
+                    name={`servicios.${index}.data.servicio`}
+                    control={control}
+                    render={({ field }) => (
+                      <Form.Item label="Servicios">
+                        <Select
+                          placeholder="Seleccione los servicios"
+                          {...field}
+                        >
+                          {servicesData
+                            .find(
+                              (roomServices) =>
+                                roomServices.id === watch(`habitacion`)
+                            )
+                            ?.servicios?.map((service) => (
+                              <Select.Option
+                                key={service.uui}
+                                value={service.uui}
+                              >
+                                {service.name}
+                              </Select.Option>
+                            ))}
+                        </Select>
+                      </Form.Item>
+                    )}
+                  />
+
+                  <span
+                    className="remove"
+                    onClick={() => {
+                      remove(index);
+                    }}
+                  >
+                    <DeleteOutlined />
+                  </span>
+                </div>
+              ))}
             </Col>
-            <Col span={24}>
+            {fields.length < 3 && (
+              <Col span={24}>
+                {watch(`habitacion`) && (
+                  <Button
+                    onClick={() => {
+                      fields.length < 3
+                        ? append({ value: "" })
+                        : openN("error");
+                    }}
+                  >
+                    Añadir servicios
+                  </Button>
+                )}
+              </Col>
+            )}
+            {fields.map((item, index) => (
+              <Col span={24} key={item.id}>
+                {watch(`servicios.${index}.data.servicio`) && (
+                  <div>
+                    <Card
+                      title={
+                        servicesData
+                          .find(
+                            (roomServices) =>
+                              roomServices.id === getValues(`habitacion`)
+                          )
+                          ?.servicios.find(
+                            (s) =>
+                              s.uui ===
+                              getValues(`servicios.${index}.data.servicio`)
+                          )?.name
+                      }
+                    >
+                      <p>
+                        Descripción:{" "}
+                        {
+                          servicesData
+                            .find(
+                              (roomServices) =>
+                                roomServices.id === getValues(`habitacion`)
+                            )
+                            ?.servicios.find(
+                              (s) =>
+                                s.uui ===
+                                getValues(`servicios.${index}.data.servicio`)
+                            )?.description
+                        }
+                      </p>
+                      <p>
+                        Precio:{" "}
+                        {
+                          servicesData
+                            .find(
+                              (roomServices) =>
+                                roomServices.id === getValues(`habitacion`)
+                            )
+                            ?.servicios.find(
+                              (s) =>
+                                s.uui ===
+                                getValues(`servicios.${index}.data.servicio`)
+                            )?.cost
+                        }
+                      </p>
+                      <Button
+                        onClick={() => {
+                          remove(index);
+                        }}
+                      >
+                        Remover
+                      </Button>
+                      <Button>Añadir </Button>
+                    </Card>
+                  </div>
+                )}
+              </Col>
+            ))} */}
+              <Col span={24}>
               <Controller
                 name={`servicio`}
                 control={control}
@@ -214,7 +337,7 @@ const Formhotel = () => {
                   <div className="service-info">
                     <p className="service-description">
                       <Controller
-                        name={`prueba`}
+                        name={`servicios.${index}.prueba`}
                         control={control}
                         rules={{
                           required: "No olvides tu habitación !",
@@ -245,7 +368,7 @@ const Formhotel = () => {
                         }
                       />
                       <Controller
-                        name={`precio`}
+                        name={`servicios.${index}.precio`}
                         control={control}
                         rules={{
                           required: "No olvides tu habitación !",
@@ -268,10 +391,10 @@ const Formhotel = () => {
                           servicesData
                             .find(
                               (roomServices) =>
-                                roomServices.id === getValues(`habitacion`)
+                                roomServices.id === watch(`habitacion`)
                             )
                             ?.servicios.find(
-                              (s) => s.uui === getValues(`servicio`)
+                              (s) => s.uui === watch(`servicio`)
                             )?.cost
                         }
                       />
@@ -289,7 +412,7 @@ const Formhotel = () => {
                     </Button>
                     <Button
                       onClick={() => {
-                        append2();
+                        append2({item:""});
                       }}
                     >
                       Añadir
@@ -298,32 +421,22 @@ const Formhotel = () => {
                 </div>
               </Col>
             ))}
-            {fields2.map((item, index) => (
-              <div key={item.id}>
-                <Card
-                  title={
-                    servicesData
-                      .find(
-                        (roomServices) =>
-                          roomServices.id === getValues(`habitacion`)
-                      )
-                      ?.servicios.find((s) => s.uui === getValues(`servicio`))
-                      ?.name
-                  }
-                >
-                  <p>Descripción: {getValues(`prueba`)}</p>
-                  <p>Precio: {getValues(`precio`)}</p>
-                  <Button
-                    onClick={() => {
-                      remove(index);
-                    }}
-                  >
-                    Remover
-                  </Button>
-                  <Button>Añadir </Button>
-                </Card>
-              </div>
-            ))}
+            {cardData.map((card, index) => (
+  <div key={index}>
+    <Card >
+      <p>Descripción: {card.description}</p>
+      <p>Precio: {card.price}</p>
+      <Button
+        onClick={() => {
+          remove(index); // Remove the corresponding servicios field array item
+        }}
+      >
+        Remover
+      </Button>
+      <Button>Añadir </Button>
+    </Card>
+  </div>
+))}
             <FechasForms
               control={control}
               errors={errors}
@@ -391,59 +504,3 @@ const Formhotel = () => {
   );
 };
 export default Formhotel;
-{
-  /* {detalles && (
-              <Col span={24}>
-                <div className="service-container">
-                  {getValues("servicio") && (
-                    <div className="service-info">
-                      <p className="service-description">
-                        {
-                          servicesData
-                            .find(
-                              (roomServices) =>
-                                roomServices.id === getValues(`habitacion`)
-                            )
-                            ?.servicios.find(
-                              (s) => s.uui === getValues(`servicio`)
-                            )?.description
-                        }
-                      </p>
-                      <p className="service-price">
-                        $ :{" "}
-                        {
-                          servicesData
-                            .find(
-                              (roomServices) =>
-                                roomServices.id === getValues(`habitacion`)
-                            )
-                            ?.servicios.find(
-                              (s) => s.uui === getValues(`servicio`)
-                            )?.cost
-                        }
-                      </p>
-                    </div>
-                  )}
-                  <div className="service-buttons">
-                    <Button
-                      onClick={() => {
-                        setdetalles(false);
-                        setValue("servicio", null);
-                        setisvalid(false);
-                      }}
-                    >
-                      Remover
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        append({item:""});
-                        setdetalles(false);
-                      }}
-                    >
-                      Añadir{" "}
-                    </Button>
-                  </div>
-                </div>
-              </Col>
-            )}  */
-}

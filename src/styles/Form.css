@@ -1,6 +1,4 @@
-body {
-  background-color: #202020;
-}
+
 .Inicio {
   box-shadow: 4px 9px 25px rgb(138, 123, 123);
   border-radius: 20px;
@@ -8,7 +6,6 @@ body {
   margin: 0px auto;
   display: flex;
   flex-direction: column;
-  color: rgb(255, 255, 255);
   gap: 20px;
   padding: 20px;
 }
