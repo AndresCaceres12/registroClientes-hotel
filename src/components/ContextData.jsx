@@ -7,7 +7,7 @@ export function useData() {
 }
 
 const ContextData = ({ children }) => {
-  const [Data, setData] =useState({ users: [] });
+  const [Data, setData] =useState({ user:[]} );
 
   return (
     <DataContext.Provider value={{ Data, setData }}>

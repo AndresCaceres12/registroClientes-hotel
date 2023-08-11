@@ -1,45 +1,97 @@
-import React from 'react';
-import { useData } from './ContextData';
+import React, { useState } from "react";
+import { useData } from "./ContextData";
 import dayjs from "dayjs";
-import { servicesData } from '../Data/FormData';
+import { Table, Button } from "antd";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import Edit from "./Edit";
 const TablaData = () => {
-  const { Data } = useData();
+  const { Data, setData } = useData();
+  const [editFormVisible, setEditFormVisible] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
+  const editUser = (index) => {
+    setSelectedUser(Data.user[index]);
+    setEditFormVisible(true);
+  };
+  console.log(selectedUser);
 
-
+  const removeService = (index) => {
+    const newUserArray = [...Data.user];
+    newUserArray.splice(index, 1);
+    setData({ ...Data, user: newUserArray });
+  };
+  const handleSave = (editedData) => {
+    const newUserArray = [...Data.user];
+    const editedIndex = newUserArray.findIndex(user => user.documento === editedData.documento); // Assuming "documento" is a unique identifier
+    if (editedIndex !== -1) {
+      newUserArray[editedIndex] = editedData;
+      setData({ ...Data, user: newUserArray });
+      setEditFormVisible(false);
+      setSelectedUser(null);
+    }
+  };
+ 
+  const columns = [
+    {
+      title: "Nombre",
+      dataIndex: "nombre",
+      key: "nombre",
+    },
+    {
+      title: "Apellido",
+      dataIndex: "apellido",
+      key: "apellido",
+    },
+    {
+      title: "Número de Cédula",
+      dataIndex: "documento",
+      key: "documento",
+    },
+    {
+      title: "Número de Teléfono",
+      dataIndex: "telefono",
+      key: "telefono",
+    },
+    {
+      title: "Fecha de Entrada",
+      dataIndex: "fechainicial",
+      key: "fechainicial",
+      render: (text) => (text ? dayjs(text.$d).format("DD-MM-YYYY") : ""),
+    },
+    {
+      title: "Fecha de Salida",
+      dataIndex: "fechafinal",
+      key: "fechafinal",
+      render: (text) => (text ? dayjs(text.$d).format("DD-MM-YYYY") : ""),
+    },
+    {
+      title: "Acciones",
+      dataIndex: "acciones",
+      key: "acciones",
+      render: (_, record, index) => (
+        <>
+          <Button danger onClick={() => removeService(index)}>
+            <DeleteOutlined />
+          </Button>
+          <Button onClick={() => editUser(index)}>
+            <EditOutlined />
+          </Button>
+        </>
+      ),
+    },
+  ];
   return (
     <div>
-      <table className="tabla">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Número de Cédula</th>
-            <th>Número de Teléfono</th>
-            <th>Fecha de Entrada</th>
-            <th>Fecha de Salida</th>
-          <th>Servicios</th>
-          </tr>
-        </thead>
-        <tbody>
-       
-            <tr >
-              <td>{Data.nombre}</td>
-              <td>{Data.apellido}</td>
-              <td>{Data.documento}</td>
-              <td>{Data.telefono}</td>
-             
-            <td>{Data.fechainicial && dayjs(Data.fechainicial.$d).format("DD-MM-YYYY")}</td>
-            <td>{Data.fechafinal && dayjs(Data.fechafinal.$d).format("DD-MM-YYYY")}</td>
-           
- 
-
-
-          </tr>
-            
-          
-        </tbody>
-      </table>
+      <Table dataSource={Data?.user} columns={columns} />
+      <Edit
+        selectedUser={selectedUser}
+        visible={editFormVisible}
+        handleSave={handleSave}
+        onClose={() => setEditFormVisible(false)}
+        onSave={(editedData) => {
+          handleSave(editedData);
+        }}
+      />
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Controller,useForm } from 'react-hook-form';
+import { Controller, } from 'react-hook-form';
 import { Input,Form,DatePicker,Col,Row } from 'antd';
 
 const FechasForms = ({control,errors,getValues}) => {
@@ -14,6 +14,7 @@ const FechasForms = ({control,errors,getValues}) => {
                     value: true,
                     message: "Fecha de entrada es requerida!",
                   },
+                  deps:["fechafinal"],
                   validate: {
                     notGreaterThan: (value) => {
                       const startDate = new Date(value);
@@ -49,6 +50,8 @@ const FechasForms = ({control,errors,getValues}) => {
                     value: true,
                     message: "Fecha de salida es requerida!",
                   },
+                  deps:["fechainicial"],
+
                   validate: {
                     notLessThan: (value) => {
                       const endDate = new Date(value);

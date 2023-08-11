@@ -13,6 +13,8 @@ export const FormDataPersonal = ({errors,control}) => {
                     value: true,
                     message: "Su nombre es requerido !",
                   },
+             
+                
                 }}
                 render={({ field }) => (
                   <Form.Item

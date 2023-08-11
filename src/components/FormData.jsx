@@ -4,11 +4,9 @@ import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { roomsData, servicesData } from "../Data/FormData";
 import { useData } from "./ContextData";
 import { FormDataPersonal } from "./FormDataPersonal";
-import Visa from "./Visa";
 import TablaData from "./TablaData";
 import ImgPagos from "./ImgPagos";
 import FechasForms from "./FechasForms";
-import { DeleteOutlined } from "@ant-design/icons";
 import {
   Button,
   Col,
@@ -30,54 +28,45 @@ const Formhotel = () => {
     formState: { errors },
     watch,
     getValues,
+    reset,
   } = useForm({
     mode: "all",
   });
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "servicios",
-  });
   const {
-    fields: fields2,
-    append: append2,
-    remove: remove2,
+    fields: serviceCards,
+    append: appendServiceCard,
+    remove,
   } = useFieldArray({
     control,
-    name: "dato",
+    name: "serviceCards",
   });
-  const [visa, setvisa] = useState(true);
-  const [masterCard, setmasterCard] = useState(false);
-  const [paypal, setpaypal] = useState(false);
-  const [pago, setpago] = useState(false);
-  const [detalles, setdetalles] = useState(false);
+  const [submittedRooms, setSubmittedRooms] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
+  console.log(selectedServices);
 
-  const showvisa = () => {
-    setvisa(true);
-    setmasterCard(false);
-    setpaypal(false);
-  };
-  const showmastercard = () => {
-    setvisa(false);
-    setmasterCard(true);
-    setpaypal(false);
-  };
-  const showpaypal = () => {
-    setvisa(false);
-    setmasterCard(false);
-    setpaypal(true);
+  const removeService = (index) => {
+    const newServices = [...selectedServices];
+    newServices.splice(index, 1);
+    setSelectedServices(newServices);
   };
   const [api, contextHolder] = notification.useNotification();
   const openN = (type) => {
     api[type]({
       message: "Hotel dice",
-      description: "Maximo de servicios por habitación alcanzado.",
+      description: mensaje,
+    });
+  };
+  const openN2 = (type) => {
+    api[type]({
+      message: "Hotel dice",
+      description: "Servicio ya añadico",
     });
   };
   const { Data, setData } = useData();
   const [open, setOpen] = useState(false);
-  const [childrenDrawer, setChildrenDrawer] = useState(false);
+  const [detalles, setdetalles] = useState(false);
   const [isvalid, setisvalid] = useState(false);
+  const [mensaje, setmensaje] = useState("");
   const showDrawer = () => {
     setOpen(true);
   };
@@ -85,34 +74,27 @@ const Formhotel = () => {
     setOpen(false);
   };
   const onSubmit = (data) => {
-    setData( Data);
+    if (!submittedRooms.includes(data.habitacion)) {
+      setData({ ...Data, user: [...Data.user, data] });
+      setSubmittedRooms([...submittedRooms, data.habitacion]);
+      console.log(data, "submit");
+      reset();
+      setOpen(false);
+      removeService();
+    } else {
+      setmensaje("Esta habitación ya ha sido enviada.");
+    }
+    openN("error");
   };
+
   console.log(Data);
-  const showChildrenDrawer = () => {
-    setChildrenDrawer(true);
-  };
-  const onChildrenDrawerClose = () => {
-    setChildrenDrawer(false);
-  };
+
   const [selectedRoom, setSelectedRoom] = useState("");
   useEffect(() => {
-    remove();
-    setValue("servicio", null);
     setisvalid(false);
+    setValue("servicio", null);
   }, [selectedRoom]);
-  const [cardData, setCardData] = useState([]);
 
-  // ...
-  
-  useEffect(() => {
-    // Update card data when servicios field array changes
-    const updatedCardData = fields.map((item, index) => ({
-      description: getValues(`servicios.${index}.prueba`),
-      price: getValues(`servicios.${index}.precio`),
-    }));
-    setCardData(updatedCardData);
-  }, [fields, getValues]);
-  
   return (
     <div>
       <div className="Inicio">
@@ -127,7 +109,7 @@ const Formhotel = () => {
         </Button>
       </div>
       <Drawer
-        title="Create a new account"
+        title="Regitro"
         width={720}
         onClose={onClose}
         open={open}
@@ -137,9 +119,6 @@ const Formhotel = () => {
         extra={
           <Space>
             <Button onClick={onClose}>Cancel</Button>
-            <Button onClick={() => append()} type="primary">
-              Submit
-            </Button>
           </Space>
         }
       >
@@ -165,6 +144,7 @@ const Formhotel = () => {
                       onChange={(selectedValue) => {
                         setSelectedRoom(selectedValue);
                         onChange(selectedValue);
+                        remove();
                       }}
                       placeholder="Seleccione una habitación"
                       value={value}
@@ -178,265 +158,173 @@ const Formhotel = () => {
                   </Form.Item>
                 )}
               />
-          </Col>
-          
-          {/* <Col span={24}>
-              {fields.map((item, index) => (
-                <div
-                  key={item.id}
-                  style={{ display: "flex", alignItems: "center" }}
-                >
-                  <Controller
-                    name={`servicios.${index}.data.servicio`}
-                    control={control}
-                    render={({ field }) => (
-                      <Form.Item label="Servicios">
-                        <Select
-                          placeholder="Seleccione los servicios"
-                          {...field}
-                        >
-                          {servicesData
-                            .find(
-                              (roomServices) =>
-                                roomServices.id === watch(`habitacion`)
-                            )
-                            ?.servicios?.map((service) => (
-                              <Select.Option
-                                key={service.uui}
-                                value={service.uui}
-                              >
-                                {service.name}
-                              </Select.Option>
-                            ))}
-                        </Select>
-                      </Form.Item>
-                    )}
-                  />
-
-                  <span
-                    className="remove"
-                    onClick={() => {
-                      remove(index);
-                    }}
-                  >
-                    <DeleteOutlined />
-                  </span>
-                </div>
-              ))}
             </Col>
-            {fields.length < 3 && (
+            <Col span={24}>
               <Col span={24}>
-                {watch(`habitacion`) && (
-                  <Button
-                    onClick={() => {
-                      fields.length < 3
-                        ? append({ value: "" })
-                        : openN("error");
-                    }}
-                  >
-                    Añadir servicios
-                  </Button>
-                )}
-              </Col>
-            )}
-            {fields.map((item, index) => (
-              <Col span={24} key={item.id}>
-                {watch(`servicios.${index}.data.servicio`) && (
-                  <div>
-                    <Card
-                      title={
-                        servicesData
-                          .find(
-                            (roomServices) =>
-                              roomServices.id === getValues(`habitacion`)
-                          )
-                          ?.servicios.find(
-                            (s) =>
-                              s.uui ===
-                              getValues(`servicios.${index}.data.servicio`)
-                          )?.name
-                      }
-                    >
-                      <p>
-                        Descripción:{" "}
-                        {
-                          servicesData
-                            .find(
-                              (roomServices) =>
-                                roomServices.id === getValues(`habitacion`)
-                            )
-                            ?.servicios.find(
-                              (s) =>
-                                s.uui ===
-                                getValues(`servicios.${index}.data.servicio`)
-                            )?.description
-                        }
-                      </p>
-                      <p>
-                        Precio:{" "}
-                        {
-                          servicesData
-                            .find(
-                              (roomServices) =>
-                                roomServices.id === getValues(`habitacion`)
-                            )
-                            ?.servicios.find(
-                              (s) =>
-                                s.uui ===
-                                getValues(`servicios.${index}.data.servicio`)
-                            )?.cost
-                        }
-                      </p>
-                      <Button
-                        onClick={() => {
-                          remove(index);
+                <Controller
+                  name={`servicio`}
+                  control={control}
+                  render={({ field: { value, onChange } }) => (
+                    <Form.Item label="Servicios" labelCol={{ span: 24 }}>
+                      <Select
+                        placeholder="Seleccione los servicios"
+                        disabled={isvalid}
+                        value={value}
+                        onChange={(selectedValue) => {
+                          setdetalles(true);
+                          if (!selectedServices.includes(selectedValue)) {
+                            onChange(selectedValue);
+                            setSelectedServices([
+                              ...selectedServices,
+                              selectedValue,
+                            ]);
+                          } else {
+                            onChange(selectedValue);
+
+                            setSelectedServices(
+                              selectedServices.filter(
+                                (service) => service !== selectedValue
+                              )
+                            );
+                          }
                         }}
                       >
-                        Remover
-                      </Button>
-                      <Button>Añadir </Button>
-                    </Card>
-                  </div>
-                )}
+                        {servicesData
+                          .find(
+                            (roomServices) =>
+                              roomServices.id === watch("habitacion")
+                          )
+                          ?.servicios?.map((service) => (
+                            <Select.Option
+                              key={service.uui}
+                              value={service.uui}
+                            
+                            >
+                              {service.name}
+                            </Select.Option>
+                          ))}
+                      </Select>
+                    </Form.Item>
+                  )}
+                />
               </Col>
-            ))} */}
-              <Col span={24}>
-              <Controller
-                name={`servicio`}
-                control={control}
-                render={({ field: { value, onChange } }) => (
-                  <Form.Item label="Servicios" labelCol={{ span: 24 }}>
-                    <Select
-                      placeholder="Seleccione los servicios"
-                      disabled={isvalid}
-                      value={value}
-                      onChange={(selectedValue) => {
-                        onChange(selectedValue);
-                        setdetalles(true);
-                        append();
-                      }}
-                    >
-                      {servicesData
-                        .find(
-                          (roomServices) =>
-                            roomServices.id === watch(`habitacion`)
-                        )
-                        ?.servicios?.map((service) => (
-                          <Select.Option key={service.uui} value={service.uui}>
-                            {service.name}
-                          </Select.Option>
-                        ))}
-                    </Select>
-                  </Form.Item>
-                )}
-              />
             </Col>
-            {fields.map((item, index) => (
-              <Col span={24} key={item.id}>
-                <div className="service-container">
-                  <div className="service-info">
-                    <p className="service-description">
-                      <Controller
-                        name={`servicios.${index}.prueba`}
-                        control={control}
-                        rules={{
-                          required: "No olvides tu habitación !",
-                        }}
-                        render={({ field: { onChange, value } }) => (
+            
+            {detalles && (
+           <>
+                      {watch(`servicio`) && (
+              <>
+                
+                  <Col span={24}>
+                    <div className="service-container">
+                      <div className="service-info">
+                        <p className="service-description">
                           <Form.Item
-                            disabled
-                            label="Habitación"
+                            label="Descripción"
                             labelCol={{ span: 24 }}
                           >
-                            <Input
-                              onChange={(selectedValue) => {
-                                onChange(selectedValue);
-                              }}
-                              value={value}
-                            />
+                            {
+                              servicesData
+                                .find(
+                                  (roomServices) =>
+                                    roomServices.id === getValues(`habitacion`)
+                                )
+                                ?.servicios.find(
+                                  (s) => s.uui === watch(`servicio`)
+                                )?.description
+                            }
                           </Form.Item>
-                        )}
-                        defaultValue={
-                          servicesData
-                            .find(
-                              (roomServices) =>
-                                roomServices.id === getValues(`habitacion`)
-                            )
-                            ?.servicios.find(
-                              (s) => s.uui === getValues(`servicio`)
-                            )?.description
-                        }
-                      />
-                      <Controller
-                        name={`servicios.${index}.precio`}
-                        control={control}
-                        rules={{
-                          required: "No olvides tu habitación !",
-                        }}
-                        render={({ field: { onChange, value } }) => (
-                          <Form.Item
-                            disabled
-                            label="Habitación"
-                            labelCol={{ span: 24 }}
-                          >
-                            <Input
-                              onChange={(selectedValue) => {
-                                onChange(selectedValue);
-                              }}
-                              value={value}
-                            />
+                        </p>
+                        <p className="service-price">
+                          <Form.Item label="Precio" labelCol={{ span: 24 }}>
+                            {
+                              servicesData
+                                .find(
+                                  (roomServices) =>
+                                    roomServices.id === getValues(`habitacion`)
+                                )
+                                ?.servicios.find(
+                                  (s) => s.uui === watch(`servicio`)
+                                )?.cost
+                            }
                           </Form.Item>
-                        )}
-                        defaultValue={
-                          servicesData
-                            .find(
-                              (roomServices) =>
-                                roomServices.id === watch(`habitacion`)
-                            )
-                            ?.servicios.find(
-                              (s) => s.uui === watch(`servicio`)
-                            )?.cost
-                        }
-                      />
-                    </p>
-                  </div>
+                        </p>
+                      </div>
 
-                  <div className="service-buttons">
-                    <Button
-                      onClick={() => {
-                        remove(index);
-                        setisvalid(false);
-                      }}
-                    >
-                      Remover
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        append2({item:""});
-                      }}
-                    >
-                      Añadir
-                    </Button>
-                  </div>
-                </div>
-              </Col>
+                      <div className="service-buttons">
+                        <Button
+                          onClick={() => {
+                            setdetalles(true);
+
+                          }}
+                        >
+                          Remover
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            const selectedService = watch("servicio");
+                            
+
+                            const serviceAlreadyAdded = serviceCards.some(
+                              (card) => card.servicio === selectedService
+                            );
+
+                            if (selectedService && !serviceAlreadyAdded) {
+                              appendServiceCard({
+                                servicio: selectedService,
+                                description: servicesData
+                                  .find(
+                                    (roomServices) =>
+                                      roomServices.id ===
+                                      getValues(`habitacion`)
+                                  )
+                                  ?.servicios.find(
+                                    (s) => s.uui === selectedService
+                                  )?.description,
+                                price: servicesData
+                                  .find(
+                                    (roomServices) =>
+                                      roomServices.id ===
+                                      getValues(`habitacion`)
+                                  )
+                                  ?.servicios.find(
+                                    (s) => s.uui === selectedService
+                                  )?.cost,
+                              });
+                              
+
+                              setValue("servicio", null);
+                              setisvalid(false);
+                            }
+                            else{
+                              openN2("error");
+                            }
+                          }}
+                        >
+                          Añadir
+                        </Button>
+                      </div>
+                    </div>
+                  </Col>
+             
+              </>
+            )} 
+           </>
+  )}
+            {serviceCards.map((card, cardIndex) => (
+              <Card key={card.id}>
+                <p>Descripción: {card.description}</p>
+                <p>Precio: {card.price}</p>
+                <Button
+                  onClick={() => {
+                    remove(cardIndex);
+                    setisvalid(false);
+                  }}
+                >
+                  Remover
+                </Button>
+              </Card>
             ))}
-            {cardData.map((card, index) => (
-  <div key={index}>
-    <Card >
-      <p>Descripción: {card.description}</p>
-      <p>Precio: {card.price}</p>
-      <Button
-        onClick={() => {
-          remove(index); // Remove the corresponding servicios field array item
-        }}
-      >
-        Remover
-      </Button>
-      <Button>Añadir </Button>
-    </Card>
-  </div>
-))}
             <FechasForms
               control={control}
               errors={errors}
@@ -444,59 +332,9 @@ const Formhotel = () => {
             />
           </Row>
 
-          <Button
-            type="primary"
-            onClick={() => {
-              showChildrenDrawer();
-              setTimeout(() => {
-                setpago(true);
-              }, 5000);
-            }}
-          >
-            Proceder al pago
+          <Button type="primary" htmlType="submit">
+            Submit
           </Button>
-
-          <Drawer
-            title="Metodos de pago"
-            width={320}
-            closable={false}
-            onClose={onChildrenDrawerClose}
-            open={childrenDrawer}
-          >
-            <ImgPagos
-              showvisa={showvisa}
-              showpaypal={showpaypal}
-              card={showmastercard}
-            />
-
-            {visa && (
-              <>
-                <Visa
-                  control={control}
-                  Controller={Controller}
-                  errors={errors}
-                />
-              </>
-            )}
-            {masterCard && (
-              <Visa control={control} Controller={Controller} errors={errors} />
-            )}
-            <Col span={24}>
-              <Button
-                type="primary"
-                onClick={() => {
-                  onChildrenDrawerClose();
-                }}
-              >
-                Estoy listo
-              </Button>
-            </Col>
-          </Drawer>
-          {pago && (
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          )}
         </form>
       </Drawer>
       <TablaData Data={Data} />
