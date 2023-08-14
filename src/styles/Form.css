@@ -1,30 +1,31 @@
-
 .Inicio {
   border-radius: 20px;
-  width: 500px;
-  margin: 0px auto;
+  width: 200px;
+
   display: flex;
   flex-direction: column;
   gap: 20px;
   padding: 20px;
 }
-form{
+.registrados {
+  border-bottom: #555 1px solid;
+}
+form {
   width: 500px;
-  margin: 0px auto; 
+  margin: 0px auto;
 }
 
-.service-info{
+.service-info {
   display: flex;
   align-items: center;
   margin: 0px;
 }
 
-
 .service-container {
   display: flex;
   flex-direction: column;
   padding: 10px;
-margin: 0px;
+  margin: 0px;
   border-radius: 5px;
 }
 .service-description {
@@ -37,5 +38,3 @@ margin: 0px;
   color: #555;
   margin: 0px;
 }
-
-
