@@ -1,7 +1,6 @@
 import React,{useEffect} from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { Drawer, Form, Input, Button,DatePicker } from 'antd';
-
+import { Drawer, Form, Input, Button,DatePicker, Modal } from 'antd';
 const Edit = ({ selectedUser, visible, onClose, onSave}) => {
   const {
     control,
@@ -21,9 +20,25 @@ const Edit = ({ selectedUser, visible, onClose, onSave}) => {
       setValue("fechafinal",selectedUser?.fechafinal)
 
     }
-  }, [selectedUser, setValue]);
+  }, [selectedUser]);
 
   const handleSave = (data) => {
+    const isUnchanged =
+    data.nombre === selectedUser.nombre &&
+    data.apellido === selectedUser.apellido &&
+    data.documento === selectedUser.documento &&
+    data.telefono === selectedUser.telefono &&
+    data.fechainicial === selectedUser.fechainicial &&
+    data.fechafinal === selectedUser.fechafinal;
+
+  // If no changes have been made, show an alert
+  if (isUnchanged) {
+    Modal.info({
+      title: 'No se han realizado cambios',
+      content: 'No se han realizado cambios en los campos.',
+    });
+    return;
+  }
     onSave(data); 
     onClose();
     console.log(data)
@@ -37,7 +52,10 @@ const Edit = ({ selectedUser, visible, onClose, onSave}) => {
           control={control}
           rules={{ required: true }}
           render={({ field }) => (
-            <Form.Item>
+            <Form.Item
+            
+            labelCol={{span:24}}
+            label="Nombre ">
               <Input {...field} placeholder="Nombre" />
             </Form.Item>
           )}
@@ -48,7 +66,9 @@ const Edit = ({ selectedUser, visible, onClose, onSave}) => {
           control={control}
           rules={{ required: true }}
           render={({ field }) => (
-            <Form.Item>
+            <Form.Item 
+            labelCol={{span:24}}
+            label="Apellido ">
               <Input {...field} placeholder="Apellido" />
             </Form.Item>
           )}
@@ -59,7 +79,9 @@ const Edit = ({ selectedUser, visible, onClose, onSave}) => {
           control={control}
           rules={{ required: true }}
           render={({ field }) => (
-            <Form.Item>
+            <Form.Item
+            labelCol={{span:24}}
+            label="Documento">
               <Input {...field} placeholder="Número de cédula" />
             </Form.Item>
           )}
@@ -70,7 +92,9 @@ const Edit = ({ selectedUser, visible, onClose, onSave}) => {
           control={control}
           rules={{ required: true }}
           render={({ field }) => (
-            <Form.Item>
+            <Form.Item
+            labelCol={{span:24}}
+            label="Número de teléfono ">
               <Input {...field} placeholder="Número de teléfono" />
             </Form.Item>
           )}
@@ -99,9 +123,11 @@ const Edit = ({ selectedUser, visible, onClose, onSave}) => {
           }}
           render={({ field }) => (
             <Form.Item
+            labelCol={{span:24}}
+            label="Número de entrada"
             validateStatus={errors.fechainicial ? "error" : "success"}
             help={errors?.fechainicial && errors?.fechafinal?.message}>
-              <DatePicker {...field} placeholder="Número de teléfono" />
+              <DatePicker {...field} />
             </Form.Item>
           )}
         />
@@ -130,10 +156,11 @@ const Edit = ({ selectedUser, visible, onClose, onSave}) => {
           }}
           render={({ field }) => (
             <Form.Item
-            
+            labelCol={{span:24}}
+            label="Fecha de salida"
             validateStatus={errors.fechafinal ? "error" : "success"}
             help={errors?.fechafinal && errors?.fechafinal?.message}>
-              <DatePicker {...field} placeholder="Número de teléfono" />
+              <DatePicker {...field} />
             </Form.Item>
           )}
         />

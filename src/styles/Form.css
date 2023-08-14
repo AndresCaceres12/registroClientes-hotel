@@ -13,72 +13,29 @@ form{
   margin: 0px auto; 
 }
 
-.Inicio span {
-  font-size: larger;
-  width: 40%;
-  margin: 0px auto;
-}
-.Inicio button {
-  width: 40%;
-  margin: 0px auto;
-}
-
-.remove{
-  
-  position: absolute;
-  left: 90%;
-}
-.remove:hover{
-  cursor: pointer;
-}
-.img {
+.service-info{
   display: flex;
-  gap: 20px;
   align-items: center;
-  padding: 0px 20px;
+  margin: 0px;
 }
 
-img {
-  box-shadow: 4px 9px 15px rgb(138, 123, 123);
-  border: 2px solid transparent;
-  padding: 10px;
-  transition: border-radius 0.3s, border 0.3s;
-}
 
-img:hover {
-  cursor: pointer;
-}
-
-img:active {
-  border-radius: 10px;
-  border: 2px solid #a1a0a0;
-}
-
-/* Estilos generales para el contenedor de servicio */
 .service-container {
   display: flex;
   flex-direction: column;
   padding: 10px;
-  margin-bottom: 10px;
+margin: 0px;
   border-radius: 5px;
 }
 .service-description {
-  margin-bottom: 5px;
+  margin: 0px;
   font-weight: bold;
 }
 
 .service-price {
   font-size: 14px;
   color: #555;
+  margin: 0px;
 }
 
 
-.remove-button {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.add-button {
-  background-color: #2ecc71;
-  color: white;
-}

@@ -5,7 +5,7 @@ import { roomsData, servicesData } from "../Data/FormData";
 import { useData } from "./ContextData";
 import { FormDataPersonal } from "./FormDataPersonal";
 import TablaData from "./TablaData";
-import ImgPagos from "./ImgPagos";
+import { DeleteOutlined } from "@ant-design/icons";
 import FechasForms from "./FechasForms";
 import {
   Button,
@@ -19,6 +19,7 @@ import {
   Card,
   notification,
   Alert,
+  Pagination
 } from "antd";
 const Formhotel = () => {
   const {
@@ -53,7 +54,7 @@ const Formhotel = () => {
   const openN = (type) => {
     api[type]({
       message: "Hotel dice",
-      description: mensaje,
+      description: "Esta habitación ya ha sido enviada.",
     });
   };
   const openN2 = (type) => {
@@ -66,7 +67,6 @@ const Formhotel = () => {
   const [open, setOpen] = useState(false);
   const [detalles, setdetalles] = useState(false);
   const [isvalid, setisvalid] = useState(false);
-  const [mensaje, setmensaje] = useState("");
   const showDrawer = () => {
     setOpen(true);
   };
@@ -81,19 +81,23 @@ const Formhotel = () => {
       reset();
       setOpen(false);
       removeService();
+      remove()
     } else {
-      setmensaje("Esta habitación ya ha sido enviada.");
+      openN("error");;
     }
-    openN("error");
+
   };
 
   console.log(Data);
-
   const [selectedRoom, setSelectedRoom] = useState("");
   useEffect(() => {
     setisvalid(false);
     setValue("servicio", null);
   }, [selectedRoom]);
+
+  const itemsPerPage = 1;
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(serviceCards.length / itemsPerPage);
 
   return (
     <div>
@@ -198,7 +202,7 @@ const Formhotel = () => {
                             <Select.Option
                               key={service.uui}
                               value={service.uui}
-                            
+
                             >
                               {service.name}
                             </Select.Option>
@@ -209,35 +213,37 @@ const Formhotel = () => {
                 />
               </Col>
             </Col>
-            
+
             {detalles && (
-           <>
-                      {watch(`servicio`) && (
               <>
-                
-                  <Col span={24}>
-                    <div className="service-container">
+                {watch(`servicio`) && (
+                  <>
+
+                    <Col span={24}>
+
                       <div className="service-info">
                         <p className="service-description">
                           <Form.Item
-                            label="Descripción"
+                            label="Descripción Del servicio"
                             labelCol={{ span: 24 }}
                           >
-                            {
-                              servicesData
-                                .find(
-                                  (roomServices) =>
-                                    roomServices.id === getValues(`habitacion`)
-                                )
-                                ?.servicios.find(
-                                  (s) => s.uui === watch(`servicio`)
-                                )?.description
-                            }
+                            <p className="service-price">
+                              {
+                                servicesData
+                                  .find(
+                                    (roomServices) =>
+                                      roomServices.id === getValues(`habitacion`)
+                                  )
+                                  ?.servicios.find(
+                                    (s) => s.uui === watch(`servicio`)
+                                  )?.description
+                              }
+                            </p>
                           </Form.Item>
                         </p>
-                        <p className="service-price">
-                          <Form.Item label="Precio" labelCol={{ span: 24 }}>
-                            {
+                        <b className="service-price">
+                          <Form.Item label="" labelCol={{ span: 24 }}>
+                            Precio  :  {
                               servicesData
                                 .find(
                                   (roomServices) =>
@@ -248,22 +254,25 @@ const Formhotel = () => {
                                 )?.cost
                             }
                           </Form.Item>
-                        </p>
+                        </b>
                       </div>
 
                       <div className="service-buttons">
                         <Button
                           onClick={() => {
-                            setdetalles(true);
-
+                            setdetalles(false);
                           }}
+                          danger
+                          type="primary"
                         >
-                          Remover
+                          <DeleteOutlined />
                         </Button>
+                        {"  "}
                         <Button
+                          type="primary"
                           onClick={() => {
                             const selectedService = watch("servicio");
-                            
+
 
                             const serviceAlreadyAdded = serviceCards.some(
                               (card) => card.servicio === selectedService
@@ -290,46 +299,95 @@ const Formhotel = () => {
                                   ?.servicios.find(
                                     (s) => s.uui === selectedService
                                   )?.cost,
+                                name: servicesData
+                                  .find(
+                                    (roomServices) =>
+                                      roomServices.id ===
+                                      getValues(`habitacion`)
+                                  )
+                                  ?.servicios.find(
+                                    (s) => s.uui === selectedService
+                                  )?.name,
                               });
-                              
+
 
                               setValue("servicio", null);
                               setisvalid(false);
                             }
-                            else{
+                            else {
                               openN2("error");
                             }
                           }}
+
                         >
                           Añadir
                         </Button>
                       </div>
-                    </div>
-                  </Col>
-             
+
+                    </Col>
+
+                  </>
+                )}
               </>
-            )} 
-           </>
-  )}
-            {serviceCards.map((card, cardIndex) => (
-              <Card key={card.id}>
-                <p>Descripción: {card.description}</p>
-                <p>Precio: {card.price}</p>
-                <Button
-                  onClick={() => {
-                    remove(cardIndex);
-                    setisvalid(false);
-                  }}
-                >
-                  Remover
-                </Button>
-              </Card>
-            ))}
+            )}
+            {serviceCards
+              .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+              .map((card, cardIndex) => (
+                <Col span={24}>
+                  <Card key={card.id}
+                    title={` ${card.name}`}
+                  >
+                    <p>Descripción: {card.description}</p>
+                    <p>Precio: {card.price}</p>
+                    <Button
+                      onClick={() => {
+                        remove(cardIndex + (currentPage - 1) * itemsPerPage);
+                        setisvalid(false);
+                      }}
+                    >
+                      Remover
+                    </Button>
+                  </Card>
+                </Col>
+              ))}
+            {
+              serviceCards.length > 0 && (
+                <Pagination
+                  current={currentPage}
+                  onChange={(page) => setCurrentPage(page)}
+                  total={serviceCards.length}
+                  pageSize={itemsPerPage}
+                />
+              )
+            }
+
+
             <FechasForms
               control={control}
               errors={errors}
               getValues={getValues}
             />
+           <Col span={24}>
+           <Controller
+              name="paymentMethod"
+              control={control}
+              label="Seleccione metodo de pago"
+              defaultValue=""
+              render={({ field }) => (
+               <Select {...field} >
+                <Select.Option value="efectivo" >
+                  Efectivo
+                </Select.Option>
+                <Select.Option value="tarjeta" >
+                  Tarjeta
+                </Select.Option>
+                <Select.Option value="otro" >
+                  Otro
+                </Select.Option>
+               </Select>
+              )}
+            />
+           </Col>
           </Row>
 
           <Button type="primary" htmlType="submit">

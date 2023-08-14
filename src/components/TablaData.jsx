@@ -72,7 +72,7 @@ const TablaData = () => {
         <>
           <Button danger onClick={() => removeService(index)}>
             <DeleteOutlined />
-          </Button>
+          </Button> {"   "}
           <Button onClick={() => editUser(index)}>
             <EditOutlined />
           </Button>
