@@ -115,13 +115,7 @@ export const FormDataPersonal = ({ errors, control }) => {
               value: true,
               message: "Número de documento requerido!",
             },
-            validate: (value) => {
-              if (value % 1 == 0) {
-                return true;
-              } else {
-                return "Solo numeros !";
-              }
-            },
+            validate: (value) => value % 1 == 0 || "Solo numeros !",
           }}
           render={({ field }) => (
             <Form.Item

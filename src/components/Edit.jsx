@@ -58,16 +58,16 @@ const Edit = ({ selectedUser, visible, onClose, onSave }) => {
       setData({ ...Data, user: newUserArray });
       setdocumento(newDocumentoArray);
     }
-
     onClose();
   };
 
   return (
     <Drawer
       title="Editar Usuario"
-      visible={visible}
+      open={visible}
       onClose={onClose}
       width={400}
+      extra={<Button onClick={onClose}>Cancel</Button>}
     >
       <form onSubmit={handleSubmit(handleSave)} style={{ maxWidth: "330px" }}>
         <div style={{ maxWidth: "100%" }}>
@@ -145,13 +145,7 @@ const Edit = ({ selectedUser, visible, onClose, onSave }) => {
                   value: true,
                   message: "Número de documento requerido!",
                 },
-                validate: (value) => {
-                  if (value % 1 == 0) {
-                    return true;
-                  } else {
-                    return "Solo numeros !";
-                  }
-                },
+                validate: (value) => value % 1 == 0 ||  "Solo numeros !",
               }}
               render={({ field }) => (
                 <Form.Item

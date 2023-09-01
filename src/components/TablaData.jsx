@@ -7,6 +7,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   MenuUnfoldOutlined,
+  ExclamationCircleTwoTone 
 } from "@ant-design/icons";
 import { servicesData } from "../Data/FormData";
 import Edit from "./Edit";
@@ -133,15 +134,18 @@ const TablaData = () => {
               : "No hay servicios seleccionados"
           }
         >
-          <Tag
+          <Button
             icon={<MenuUnfoldOutlined />}
-            color={selectedServices.length > 0 ? "cyan" : "default"}
             onClick={() => {
               const serviceNames = getServiceNames(serviceCards);
               setSelectedServices(serviceNames);
               setServicesModalVisible(true);
             }}
-          ></Tag>
+            onMouseOver={() => {
+              const serviceNames = getServiceNames(serviceCards);
+              setSelectedServices(serviceNames);
+            }}
+          />
         </Tooltip>
       ),
     },
@@ -150,6 +154,8 @@ const TablaData = () => {
       title: "Acciones",
       dataIndex: "acciones",
       key: "acciones",
+      fixed: "right",
+
       render: (_, record, index) => (
         <>
           <Tooltip title="Eliminar">
@@ -187,7 +193,22 @@ const TablaData = () => {
         Usuarios registrados
       </Typography.Title>
 
-      <Table dataSource={Data?.user} columns={columns} />
+      <Table
+        locale={{
+          emptyText: (
+            <span>
+              No hay registros disponibles {"  "} <ExclamationCircleTwoTone />
+            </span>
+          ),
+        }}
+        dataSource={Data?.user}
+        columns={columns}
+        pagination={false}
+        size="middle"
+        scroll={{
+          x: 1300,
+        }}
+      />
       <Edit
         selectedUser={selectedUser}
         visible={editFormVisible}

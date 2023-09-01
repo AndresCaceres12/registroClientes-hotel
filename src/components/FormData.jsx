@@ -5,7 +5,7 @@ import { roomsData, servicesData } from "../Data/FormData";
 import { useData } from "./ContextData";
 import { FormDataPersonal } from "./FormDataPersonal";
 import TablaData from "./TablaData";
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import FechasForms from "./FechasForms";
 import { v4 as uuidv4 } from "uuid";
 
@@ -36,7 +36,6 @@ const Formhotel = () => {
   } = useForm({
     mode: "all",
   });
-
   const [messageApi2, contextHolder2] = message.useMessage();
   const success = () => {
     messageApi2.open({
@@ -55,6 +54,7 @@ const Formhotel = () => {
   });
 
   const [selectedServices, setSelectedServices] = useState([]);
+  console.log(selectedServices);
 
   const removeService = (index) => {
     const newServices = [...selectedServices];
@@ -69,14 +69,7 @@ const Formhotel = () => {
       description: "Servicio ya añadico",
     });
   };
-  const {
-    Data,
-    setData,
-    setSubmittedRooms,
-    submittedRooms,
-    setdocumento,
-    documento,
-  } = useData();
+c
   const [open, setOpen] = useState(false);
   const [detalles, setdetalles] = useState(false);
   const [isvalid, setisvalid] = useState(false);
@@ -194,14 +187,25 @@ const Formhotel = () => {
                         onChange(selectedValue);
                         remove();
                       }}
+                      notFoundContent={
+                        <div style={{padding:"30px",display:"flex" , gap:"30px",alignItems:"center"}}>
+                          <span >No hay habitaciones disponibles</span>
+                          <ExclamationCircleOutlined />
+                        </div>
+                      }
                       placeholder="Seleccione una habitación"
                       value={value}
                     >
-                      {roomsData.map((room) => (
-                        <Select.Option key={room.id} value={room.id}>
-                          Habitación {room.id}
-                        </Select.Option>
-                      ))}
+                      {roomsData
+                        .filter((room) => !submittedRooms.includes(room.id))
+                        .map((filteredRoom) => (
+                          <Select.Option
+                            key={filteredRoom.id}
+                            value={filteredRoom.id}
+                          >
+                            Habitación {filteredRoom.id}
+                          </Select.Option>
+                        ))}
                     </Select>
                   </Form.Item>
                 )}
@@ -211,44 +215,45 @@ const Formhotel = () => {
               <Controller
                 name={`servicio`}
                 control={control}
-                render={({ field: { value, onChange } }) => (
-                  <Form.Item label="Servicios" labelCol={{ span: 24 }}>
-                    <Select
-                      placeholder="Seleccione los servicios"
-                      disabled={isvalid}
-                      value={value}
-                      onChange={(selectedValue) => {
-                        setdetalles(true);
-                        if (!selectedServices.includes(selectedValue)) {
-                          onChange(selectedValue);
-                          setSelectedServices([
-                            ...selectedServices,
-                            selectedValue,
-                          ]);
-                        } else {
-                          onChange(selectedValue);
+                render={({ field: { value, onChange } }) => {
+                  const selectedServiceIds = serviceCards.map(
+                    (card) => card.servicio
+                  );
+                  const availableServices = servicesData
+                    .find(
+                      (roomServices) => roomServices.id === watch("habitacion")
+                    )
+                    ?.servicios.filter(
+                      (service) => !selectedServiceIds.includes(service.uui)
+                    );
 
-                          setSelectedServices(
-                            selectedServices.filter(
-                              (service) => service !== selectedValue
-                            )
-                          );
+                  return (
+                    <Form.Item label="Servicios" labelCol={{ span: 24 }}>
+                      <Select
+                        placeholder="Seleccione los servicios"
+                        disabled={isvalid}
+                        value={value}
+                        notFoundContent={
+                          <div style={{padding:"30px",display:"flex" , gap:"30px",alignItems:"center"}}>
+                            <span >No hay servicios disponibles</span>
+                            <ExclamationCircleOutlined />
+                          </div>
                         }
-                      }}
-                    >
-                      {servicesData
-                        .find(
-                          (roomServices) =>
-                            roomServices.id === watch("habitacion")
-                        )
-                        ?.servicios?.map((service) => (
+                      
+                        onChange={(selectedValue) => {
+                          setdetalles(true);
+                          onChange(selectedValue);
+                        }}
+                      >
+                        {availableServices?.map((service) => (
                           <Select.Option key={service.uui} value={service.uui}>
                             {service.name}
                           </Select.Option>
                         ))}
-                    </Select>
-                  </Form.Item>
-                )}
+                      </Select>
+                    </Form.Item>
+                  );
+                }}
               />
             </Col>
 
@@ -299,6 +304,7 @@ const Formhotel = () => {
                         <Button
                           onClick={() => {
                             setdetalles(false);
+                            setValue("servicio", null);
                           }}
                           danger
                           type="primary"
@@ -369,7 +375,11 @@ const Formhotel = () => {
               )
               .map((card, cardIndex) => (
                 <Col span={24}>
-                  <Card key={card.id} title={` ${card.name}`}>
+                  <Card
+                    key={card.id}
+                    title={` ${card.name}`}
+                    className="card-fade-in"
+                  >
                     <p>Descripción: {card.description}</p>
                     <p>Precio: {card.price}</p>
                     <Button
